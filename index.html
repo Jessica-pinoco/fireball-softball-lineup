@@ -32,9 +32,39 @@
       text-align:center;
     }
 
+    select,input,button,textarea{
+      padding:8px;
+      margin:4px;
+    }
+
     select,input{
-      padding:5px;
       width:90%;
+    }
+
+    button{
+      cursor:pointer;
+      border:0;
+      border-radius:8px;
+      background:#d62828;
+      color:white;
+      font-weight:bold;
+    }
+
+    textarea{
+      width:100%;
+      height:220px;
+      box-sizing:border-box;
+    }
+
+    .manualBox{
+      display:none;
+      margin-top:6px;
+    }
+
+    .warning{
+      color:#d62828;
+      font-weight:bold;
+      margin-top:10px;
     }
   </style>
 </head>
@@ -46,12 +76,12 @@
 <div class="section">
   <h2>比賽資訊</h2>
 
-  <p>比賽日期：<input type="date"></p>
-  <p>對手隊名：<input type="text" placeholder="請輸入對手"></p>
+  <p>比賽日期：<input id="gameDate" type="date"></p>
+  <p>對手隊名：<input id="opponent" type="text" placeholder="請輸入對手"></p>
 
   <p>
     先攻先守：
-    <select>
+    <select id="homeAway">
       <option>先攻</option>
       <option>先守</option>
     </select>
@@ -71,6 +101,8 @@
     </thead>
     <tbody id="lineupTable"></tbody>
   </table>
+
+  <div id="duplicateWarning" class="warning"></div>
 </div>
 
 <div class="section">
@@ -85,6 +117,15 @@
     </thead>
     <tbody id="benchTable"></tbody>
   </table>
+</div>
+
+<div class="section">
+  <h2>LINE 文字版</h2>
+
+  <button onclick="generateLineText()">產生 LINE 文字</button>
+  <button onclick="copyLineText()">複製文字</button>
+
+  <textarea id="lineText" placeholder="按下「產生 LINE 文字」後，這裡會出現排棒結果"></textarea>
 </div>
 
 <script>
@@ -106,30 +147,62 @@
     "#69 曾鈺淀",
     "#72 黃顏斌丞",
     "#97 黃顏維辰",
-    "#99 簡崇恩",
-    "➕ 手動輸入球員"
+    "#99 簡崇恩"
   ];
 
-  const positions = [
-    "P",
-    "C",
-    "1B",
-    "2B",
-    "3B",
-    "SS",
-    "10",
-    "LF",
-    "CF",
-    "RF",
-    "DH"
-  ];
+  const positions = ["P", "C", "1B", "2B", "3B", "SS", "10", "LF", "CF", "RF", "DH"];
 
   function playerOptions() {
-    return players.map(player => `<option>${player}</option>`).join("");
+    return `
+      <option value="">請選擇球員</option>
+      ${players.map(player => `<option value="${player}">${player}</option>`).join("")}
+      <option value="manual">➕ 手動輸入球員</option>
+    `;
   }
 
   function positionOptions() {
-    return positions.map(position => `<option>${position}</option>`).join("");
+    return `
+      <option value="">請選擇守備位置</option>
+      ${positions.map(position => `<option value="${position}">${position}</option>`).join("")}
+    `;
+  }
+
+  function createPlayerCell(idPrefix, index) {
+    return `
+      <select class="playerSelect" id="${idPrefix}Player${index}" onchange="handlePlayerChange('${idPrefix}', ${index}); checkDuplicates();">
+        ${playerOptions()}
+      </select>
+
+      <div class="manualBox" id="${idPrefix}Manual${index}">
+        <input id="${idPrefix}Number${index}" type="text" placeholder="背號">
+        <input id="${idPrefix}Name${index}" type="text" placeholder="姓名">
+      </div>
+    `;
+  }
+
+  function handlePlayerChange(idPrefix, index) {
+    const select = document.getElementById(`${idPrefix}Player${index}`);
+    const manualBox = document.getElementById(`${idPrefix}Manual${index}`);
+
+    if (select.value === "manual") {
+      manualBox.style.display = "block";
+    } else {
+      manualBox.style.display = "none";
+    }
+  }
+
+  function getPlayerText(idPrefix, index) {
+    const select = document.getElementById(`${idPrefix}Player${index}`);
+
+    if (select.value === "manual") {
+      const number = document.getElementById(`${idPrefix}Number${index}`).value.trim();
+      const name = document.getElementById(`${idPrefix}Name${index}`).value.trim();
+
+      if (!number && !name) return "";
+      return `#${number} ${name}`;
+    }
+
+    return select.value;
   }
 
   const lineupTable = document.getElementById("lineupTable");
@@ -138,15 +211,9 @@
     lineupTable.innerHTML += `
       <tr>
         <td>${i}</td>
+        <td>${createPlayerCell("lineup", i)}</td>
         <td>
-          <select>
-            <option value="">請選擇球員</option>
-            ${playerOptions()}
-          </select>
-        </td>
-        <td>
-          <select>
-            <option value="">請選擇守備位置</option>
+          <select id="position${i}">
             ${positionOptions()}
           </select>
         </td>
@@ -160,14 +227,70 @@
     benchTable.innerHTML += `
       <tr>
         <td>候補${i}</td>
-        <td>
-          <select>
-            <option value="">請選擇球員</option>
-            ${playerOptions()}
-          </select>
-        </td>
+        <td>${createPlayerCell("bench", i)}</td>
       </tr>
     `;
+  }
+
+  function checkDuplicates() {
+    const selectedPlayers = [];
+
+    for (let i = 1; i <= 11; i++) {
+      const player = getPlayerText("lineup", i);
+      if (player) selectedPlayers.push(player);
+    }
+
+    for (let i = 1; i <= 6; i++) {
+      const player = getPlayerText("bench", i);
+      if (player) selectedPlayers.push(player);
+    }
+
+    const duplicates = selectedPlayers.filter((player, index) => selectedPlayers.indexOf(player) !== index);
+    const uniqueDuplicates = [...new Set(duplicates)];
+
+    const warning = document.getElementById("duplicateWarning");
+
+    if (uniqueDuplicates.length > 0) {
+      warning.textContent = "⚠️ 重複選到：" + uniqueDuplicates.join("、");
+    } else {
+      warning.textContent = "";
+    }
+  }
+
+  function generateLineText() {
+    const date = document.getElementById("gameDate").value || "未填日期";
+    const opponent = document.getElementById("opponent").value || "未填對手";
+    const homeAway = document.getElementById("homeAway").value;
+
+    let text = `🔥 Fireball Lineup\\n`;
+    text += `${date} vs ${opponent}\\n`;
+    text += `${homeAway}\\n\\n`;
+    text += `先發名單：\\n`;
+
+    for (let i = 1; i <= 11; i++) {
+      const player = getPlayerText("lineup", i) || "未選球員";
+      const position = document.getElementById(`position${i}`).value || "未選位置";
+      text += `${i}棒 ${player} - ${position}\\n`;
+    }
+
+    text += `\\n候補：\\n`;
+
+    for (let i = 1; i <= 6; i++) {
+      const player = getPlayerText("bench", i);
+      if (player) {
+        text += `候補${i} ${player}\\n`;
+      }
+    }
+
+    document.getElementById("lineText").value = text;
+    checkDuplicates();
+  }
+
+  function copyLineText() {
+    const lineText = document.getElementById("lineText");
+    lineText.select();
+    document.execCommand("copy");
+    alert("已複製，可以貼到 LINE 囉！");
   }
 </script>
 
