@@ -327,100 +327,144 @@
     alert("已複製，可以貼到 LINE 囉！");
   }
 
-  function drawField() {
-    const canvas = document.getElementById("fieldCanvas");
-    const ctx = canvas.getContext("2d");
+function drawField() {
+  const canvas = document.getElementById("fieldCanvas");
+  const ctx = canvas.getContext("2d");
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = "#0b8f3a";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // 柔和配色
+  const grass = "#2f6f3a";
+  const grassDark = "#2a6435";
+  const dirt = "#9b6a3a";
+  const dirtLight = "#b78a55";
+  const white = "#ffffff";
+  const marker = "#c49a63";
 
-    ctx.fillStyle = "#c68642";
+  // 背景草地
+  ctx.fillStyle = grass;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // 草地直條紋
+  for (let x = 0; x < canvas.width; x += 60) {
+    ctx.fillStyle = x % 120 === 0 ? grassDark : "rgba(255,255,255,0.03)";
+    ctx.fillRect(x, 0, 60, canvas.height);
+  }
+
+  // 外野弧線
+  ctx.strokeStyle = "rgba(210,180,120,0.65)";
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.arc(300, 390, 390, Math.PI * 1.1, Math.PI * 1.9);
+  ctx.stroke();
+
+  // 外野邊線
+  ctx.strokeStyle = "rgba(255,255,255,0.85)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(300, 390);
+  ctx.lineTo(0, 150);
+  ctx.moveTo(300, 390);
+  ctx.lineTo(600, 150);
+  ctx.stroke();
+
+  // 內野土區大弧形
+  ctx.fillStyle = dirt;
+  ctx.beginPath();
+  ctx.arc(300, 330, 210, Math.PI * 1.05, Math.PI * 1.95);
+  ctx.lineTo(410, 280);
+  ctx.lineTo(300, 390);
+  ctx.lineTo(190, 280);
+  ctx.closePath();
+  ctx.fill();
+
+  // 內野菱形草地
+  ctx.fillStyle = grass;
+  ctx.beginPath();
+  ctx.moveTo(300, 390);
+  ctx.lineTo(205, 295);
+  ctx.lineTo(300, 200);
+  ctx.lineTo(395, 295);
+  ctx.closePath();
+  ctx.fill();
+
+  // 壘線
+  ctx.strokeStyle = white;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(300, 390);
+  ctx.lineTo(190, 280);
+  ctx.lineTo(300, 170);
+  ctx.lineTo(410, 280);
+  ctx.lineTo(300, 390);
+  ctx.stroke();
+
+  // 壘包
+  ctx.fillStyle = white;
+  ctx.fillRect(292, 382, 16, 16); // 本壘
+  ctx.fillRect(182, 272, 16, 16); // 三壘
+  ctx.fillRect(292, 162, 16, 16); // 二壘
+  ctx.fillRect(402, 272, 16, 16); // 一壘
+
+  // 守備位置座標
+  const fieldPositions = {
+    "P":  { x:300, y:305, title:"P",  subtitle:"投手" },
+    "C":  { x:300, y:450, title:"C",  subtitle:"捕手" },
+    "1B": { x:445, y:285, title:"1B", subtitle:"一壘手" },
+    "2B": { x:390, y:205, title:"2B", subtitle:"二壘手" },
+    "3B": { x:155, y:285, title:"3B", subtitle:"三壘手" },
+    "SS": { x:210, y:205, title:"SS", subtitle:"游擊手" },
+    "10": { x:385, y:115, title:"10", subtitle:"10洞" },
+    "LF": { x:95,  y:120, title:"LF", subtitle:"左外野手" },
+    "CF": { x:300, y:65,  title:"CF", subtitle:"中外野手" },
+    "RF": { x:505, y:120, title:"RF", subtitle:"右外野手" }
+  };
+
+  const assigned = {};
+
+  for (let i = 1; i <= 11; i++) {
+    const player = getPlayerText("lineup", i);
+    const position = document.getElementById(`position${i}`).value;
+
+    if (fieldPositions[position] && player) {
+      assigned[position] = player;
+    }
+  }
+
+  Object.keys(fieldPositions).forEach(pos => {
+    const info = fieldPositions[pos];
+    const player = assigned[pos] || "未排";
+
+    // 位置文字
+    ctx.fillStyle = white;
+    ctx.textAlign = "center";
+
+    ctx.font = "bold 22px Arial";
+    ctx.fillText(info.title, info.x, info.y - 34);
+
+    ctx.font = "16px Arial";
+    ctx.fillText(info.subtitle, info.x, info.y - 12);
+
+    // 球員圓圈
+    ctx.fillStyle = marker;
     ctx.beginPath();
-    ctx.moveTo(300, 390);
-    ctx.lineTo(190, 280);
-    ctx.lineTo(300, 170);
-    ctx.lineTo(410, 280);
-    ctx.closePath();
+    ctx.arc(info.x, info.y + 18, 22, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(300, 390);
-    ctx.lineTo(190, 280);
-    ctx.lineTo(300, 170);
-    ctx.lineTo(410, 280);
-    ctx.lineTo(300, 390);
-    ctx.stroke();
+    ctx.fillStyle = white;
+    ctx.font = "bold 12px Arial";
 
-    ctx.strokeStyle = "rgba(255,255,255,0.6)";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(300, 390);
-    ctx.lineTo(70, 130);
-    ctx.moveTo(300, 390);
-    ctx.lineTo(530, 130);
-    ctx.stroke();
+    // 只取球員姓名，不顯示背號時可讀性比較好
+    const displayName = player.replace(/^#\d+\s*/, "");
+    ctx.fillText(displayName, info.x, info.y + 23);
+  });
 
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(292, 382, 16, 16);
-    ctx.fillRect(182, 272, 16, 16);
-    ctx.fillRect(292, 162, 16, 16);
-    ctx.fillRect(402, 272, 16, 16);
-
-    const fieldPositions = {
-      "P":  { x:300, y:300 },
-      "C":  { x:300, y:435 },
-      "1B": { x:430, y:275 },
-      "2B": { x:360, y:210 },
-      "3B": { x:170, y:275 },
-      "SS": { x:240, y:210 },
-      "10": { x:300, y:140 },
-      "LF": { x:120, y:110 },
-      "CF": { x:300, y:70 },
-      "RF": { x:480, y:110 }
-    };
-
-    const assigned = {};
-
-    for (let i = 1; i <= 11; i++) {
-      const player = getPlayerText("lineup", i);
-      const position = document.getElementById(`position${i}`).value;
-
-      if (fieldPositions[position]) {
-        assigned[position] = player || "未選球員";
-      }
-    }
-
-    Object.keys(fieldPositions).forEach(pos => {
-      const info = fieldPositions[pos];
-      const player = assigned[pos] || "未排";
-
-      ctx.fillStyle = "#ffdd00";
-      ctx.beginPath();
-      ctx.arc(info.x, info.y, 28, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.strokeStyle = "#d62828";
-      ctx.lineWidth = 3;
-      ctx.stroke();
-
-      ctx.fillStyle = "#000";
-      ctx.font = "bold 14px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText(pos, info.x, info.y - 8);
-
-      ctx.font = "12px Arial";
-      ctx.fillText(player, info.x, info.y + 10);
-    });
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 22px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("Fireball 守備位置圖", 300, 35);
-  }
+  // 標題
+  ctx.fillStyle = white;
+  ctx.font = "bold 24px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("Fireball 守備位置圖", 300, 30);
+}
 </script>
 
 </body>
