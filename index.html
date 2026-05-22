@@ -354,20 +354,39 @@
   ctx.lineTo(610, 155);
   ctx.stroke();
 
-  // 內野大土區：扇形，不凸出壘線
+  // 上方扇形土區：只涵蓋 SS / 2B，不往一三壘外側亂凸
   ctx.fillStyle = dirt;
   ctx.beginPath();
-
-  ctx.moveTo(145, 335);                    // 三壘側下緣
-  ctx.lineTo(190, 290);                    // 三壘側接弧線
-  ctx.quadraticCurveTo(300, 105, 410, 290); // 上方漂亮弧線
-  ctx.lineTo(455, 335);                    // 一壘側下緣
-
-  ctx.quadraticCurveTo(382, 388, 300, 430); // 右下收回本壘
-  ctx.quadraticCurveTo(218, 388, 145, 335); // 左下收回本壘
-
+  ctx.moveTo(140, 335);
+  ctx.quadraticCurveTo(300, 80, 460, 335);
+  ctx.lineTo(405, 305);
+  ctx.lineTo(300, 200);
+  ctx.lineTo(195, 305);
   ctx.closePath();
   ctx.fill();
+    
+  // 一壘線土路
+  ctx.beginPath();
+  ctx.moveTo(405, 305);
+  ctx.lineTo(300, 410);
+  ctx.lineTo(335, 410);
+  ctx.lineTo(430, 315);
+  ctx.closePath();
+  ctx.fill();
+    
+  // 三壘線土路
+  ctx.beginPath();
+  ctx.moveTo(195, 305);
+  ctx.lineTo(300, 410);
+  ctx.lineTo(265, 410);
+  ctx.lineTo(170, 315);
+  ctx.closePath();
+  ctx.fill();
+
+// 本壘圓形土區
+ctx.beginPath();
+ctx.arc(300, 410, 42, 0, Math.PI * 2);
+ctx.fill();
 
   // 中間草地菱形，保留條紋
   ctx.save();
@@ -384,25 +403,6 @@
     ctx.fillRect(x, 0, 55, H);
   }
   ctx.restore();
-
-  // 二壘、一壘、三壘、本壘旁的小土弧
-  ctx.fillStyle = dirt;
-
-  ctx.beginPath();
-  ctx.arc(300, 200, 28, 0, Math.PI);
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.arc(195, 305, 28, -Math.PI / 2, Math.PI / 2);
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.arc(405, 305, 28, Math.PI / 2, Math.PI * 1.5);
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.arc(300, 410, 42, 0, Math.PI * 2);
-  ctx.fill();
 
   // 壘線
   ctx.strokeStyle = white;
