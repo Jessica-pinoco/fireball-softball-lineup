@@ -140,6 +140,7 @@
   <h2>守備位置圖</h2>
 
   <button onclick="drawField()">產生守備圖</button>
+  <button onclick="downloadFieldImage()">下載守備圖</button>
 
   <br><br>
 
@@ -333,100 +334,135 @@ function drawField() {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const grass = "#2f6f3a";
-  const grassDark = "#285f32";
-  const grassLight = "#3b7d45";
-  const dirt = "#a36f38";
+  const W = canvas.width;
+  const H = canvas.height;
+
+  const grassDark = "#215b30";
+  const grassLight = "#347b42";
+  const dirt = "#a36d36";
   const white = "#ffffff";
-  const marker = "#c89d63";
+  const marker = "#c99b5e";
 
-  ctx.fillStyle = grass;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  for (let x = 0; x < canvas.width; x += 55) {
+  // 背景草地
+  for (let x = 0; x < W; x += 55) {
     ctx.fillStyle = (x / 55) % 2 === 0 ? grassDark : grassLight;
-    ctx.fillRect(x, 0, 55, canvas.height);
+    ctx.fillRect(x, 0, 55, H);
   }
 
-  ctx.strokeStyle = "rgba(190,165,105,0.75)";
+  // 外野弧線
+  ctx.strokeStyle = "rgba(198,171,105,0.8)";
   ctx.lineWidth = 4;
   ctx.beginPath();
-  ctx.arc(300, 390, 395, Math.PI * 1.08, Math.PI * 1.92);
+  ctx.arc(300, 400, 405, Math.PI * 1.08, Math.PI * 1.92);
   ctx.stroke();
 
-  ctx.strokeStyle = "rgba(255,255,255,0.9)";
+  // 外野邊線
+  ctx.strokeStyle = white;
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(300, 405);
-  ctx.lineTo(-20, 150);
-  ctx.moveTo(300, 405);
-  ctx.lineTo(620, 150);
+  ctx.moveTo(300, 410);
+  ctx.lineTo(-10, 155);
+  ctx.moveTo(300, 410);
+  ctx.lineTo(610, 155);
   ctx.stroke();
-  
-  // 內野土區：寬大的漂亮弧形，涵蓋 SS / 2B
+
+  // 內野大土區：漂亮大弧形
   ctx.fillStyle = dirt;
   ctx.beginPath();
-  
-  // 左下起點
-  ctx.moveTo(95, 315);
-  
-  // 上緣大弧形，拉高並放寬
-  ctx.quadraticCurveTo(300, 85, 505, 315);
-  
-  // 右側往本壘附近收
-  ctx.quadraticCurveTo(430, 375, 300, 420);
-  
-  // 左側往本壘附近收
-  ctx.quadraticCurveTo(170, 375, 95, 315);
-  
+  ctx.moveTo(95, 325);
+  ctx.quadraticCurveTo(300, 120, 505, 325);
+  ctx.quadraticCurveTo(450, 340, 405, 330);
+  ctx.quadraticCurveTo(360, 390, 300, 430);
+  ctx.quadraticCurveTo(240, 390, 195, 330);
+  ctx.quadraticCurveTo(150, 340, 95, 325);
   ctx.closePath();
   ctx.fill();
 
-  // 中間草地菱形
-  ctx.fillStyle = grass;
+  // 中間草地菱形，保留條紋感
+  ctx.save();
   ctx.beginPath();
-  ctx.moveTo(300, 405);
-  ctx.lineTo(200, 300);
-  ctx.lineTo(300, 195);
-  ctx.lineTo(400, 300);
+  ctx.moveTo(300, 410);
+  ctx.lineTo(195, 305);
+  ctx.lineTo(300, 200);
+  ctx.lineTo(405, 305);
   ctx.closePath();
+  ctx.clip();
+
+  for (let x = 0; x < W; x += 55) {
+    ctx.fillStyle = (x / 55) % 2 === 0 ? grassDark : grassLight;
+    ctx.fillRect(x, 0, 55, H);
+  }
+  ctx.restore();
+
+  // 四個壘附近的小內凹弧形草區
+  ctx.fillStyle = grassDark;
+
+  ctx.beginPath();
+  ctx.arc(300, 200, 28, 0, Math.PI);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(195, 305, 28, -Math.PI / 2, Math.PI / 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(405, 305, 28, Math.PI / 2, Math.PI * 1.5);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(300, 410, 30, Math.PI, 0);
   ctx.fill();
 
   // 本壘圓形土區
   ctx.fillStyle = dirt;
   ctx.beginPath();
-  ctx.arc(300, 405, 45, 0, Math.PI * 2);
+  ctx.arc(300, 410, 42, 0, Math.PI * 2);
   ctx.fill();
 
   // 壘線
   ctx.strokeStyle = white;
   ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.moveTo(300, 405);
-  ctx.lineTo(200, 300);
-  ctx.lineTo(300, 195);
-  ctx.lineTo(400, 300);
-  ctx.lineTo(300, 405);
+  ctx.moveTo(300, 410);
+  ctx.lineTo(195, 305);
+  ctx.lineTo(300, 200);
+  ctx.lineTo(405, 305);
+  ctx.lineTo(300, 410);
   ctx.stroke();
 
   // 壘包
   ctx.fillStyle = white;
-  ctx.fillRect(292, 397, 16, 16);
-  ctx.fillRect(192, 292, 16, 16);
-  ctx.fillRect(292, 187, 16, 16);
-  ctx.fillRect(392, 292, 16, 16);
+  ctx.fillRect(292, 192, 16, 16); // 二壘
+  ctx.fillRect(187, 297, 16, 16); // 三壘
+  ctx.fillRect(397, 297, 16, 16); // 一壘
+
+  // 本壘板
+  ctx.beginPath();
+  ctx.moveTo(288, 405);
+  ctx.lineTo(312, 405);
+  ctx.lineTo(312, 418);
+  ctx.lineTo(300, 430);
+  ctx.lineTo(288, 418);
+  ctx.closePath();
+  ctx.fill();
+
+  // 打擊區
+  ctx.strokeStyle = white;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(275, 395, 14, 36);
+  ctx.strokeRect(311, 395, 14, 36);
 
   const fieldPositions = {
-    "P":  { x:300, y:315, title:"P",  subtitle:"投手" },
-    "C":  { x:300, y:475, title:"C",  subtitle:"捕手" },
-    "1B": { x:450, y:310, title:"1B", subtitle:"一壘手" },
-    "2B": { x:395, y:230, title:"2B", subtitle:"二壘手" },
-    "3B": { x:155, y:310, title:"3B", subtitle:"三壘手" },
+    "P":  { x:300, y:320, title:"P",  subtitle:"投手" },
+    "C":  { x:300, y:470, title:"C",  subtitle:"捕手" },
+    "1B": { x:455, y:320, title:"1B", subtitle:"一壘手" },
+    "2B": { x:390, y:230, title:"2B", subtitle:"二壘手" },
+    "3B": { x:145, y:320, title:"3B", subtitle:"三壘手" },
     "SS": { x:215, y:230, title:"SS", subtitle:"游擊手" },
     "10": { x:385, y:125, title:"10", subtitle:"10洞" },
-    "LF": { x:95,  y:135, title:"LF", subtitle:"左外野手" },
+    "LF": { x:95,  y:140, title:"LF", subtitle:"左外野手" },
     "CF": { x:300, y:75,  title:"CF", subtitle:"中外野手" },
-    "RF": { x:505, y:135, title:"RF", subtitle:"右外野手" }
+    "RF": { x:505, y:140, title:"RF", subtitle:"右外野手" }
   };
 
   const assigned = {};
@@ -464,6 +500,16 @@ function drawField() {
     const displayName = player.replace(/^#\d+\s*/, "");
     ctx.fillText(displayName, info.x, info.y + 22);
   });
+
+  function downloadFieldImage() {
+  drawField();
+
+  const canvas = document.getElementById("fieldCanvas");
+  const link = document.createElement("a");
+
+  link.download = "fireball-field.png";
+  link.href = canvas.toDataURL("image/png");
+  link.click();
 }
 </script>
 
