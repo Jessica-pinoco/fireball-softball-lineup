@@ -357,8 +357,8 @@
   // 上方扇形土區：只涵蓋 SS / 2B，不往一三壘外側亂凸
   ctx.fillStyle = dirt;
   ctx.beginPath();
-  ctx.moveTo(110, 250);
-  ctx.quadraticCurveTo(300, 25, 490, 250);
+  ctx.moveTo(105, 250);
+  ctx.quadraticCurveTo(300, 25, 495, 250);
   ctx.lineTo(405, 305);
   ctx.lineTo(300, 200);
   ctx.lineTo(195, 305);
@@ -370,7 +370,7 @@
   ctx.moveTo(405, 305);
   ctx.lineTo(300, 410);
   ctx.lineTo(318, 410);
-  ctx.lineTo(490, 250);
+  ctx.lineTo(495, 250);
   ctx.closePath();
   ctx.fill();
   
@@ -379,26 +379,26 @@
   ctx.moveTo(195, 305);
   ctx.lineTo(300, 410);
   ctx.lineTo(282, 410);
-  ctx.lineTo(110, 250);
+  ctx.lineTo(105, 250);
   ctx.closePath();
   ctx.fill();
 
   // 一壘土丘
   ctx.fillStyle = dirt;
   ctx.beginPath();
-  ctx.arc(405, 305, 28, 0, Math.PI * 2);
+  ctx.arc(388, 305, 24, 0, Math.PI * 2);
   ctx.fill();
   
   // 二壘土丘
   ctx.fillStyle = dirt;
   ctx.beginPath();
-  ctx.arc(300, 200, 28, 0, Math.PI * 2);
+  ctx.arc(300, 218, 24, 0, Math.PI * 2);
   ctx.fill();
 
   // 三壘土丘
   ctx.fillStyle = dirt;
   ctx.beginPath();
-  ctx.arc(195, 305, 28, 0, Math.PI * 2);
+  ctx.arc(212, 305, 24, 0, Math.PI * 2);
   ctx.fill();
     
   // 本壘圓形土區
@@ -452,8 +452,8 @@
   // 打擊區
   ctx.strokeStyle = white;
   ctx.lineWidth = 2;
-  ctx.strokeRect(275, 395, 14, 36);
-  ctx.strokeRect(311, 395, 14, 36);
+  ctx.strokeRect(270, 395, 14, 36);
+  ctx.strokeRect(316, 395, 14, 36);
 
   const fieldPositions = {
     "P":  { x:300, y:320, title:"P",  subtitle:"投手" },
