@@ -340,24 +340,20 @@ function drawField() {
   const white = "#ffffff";
   const marker = "#c89d63";
 
-  // 背景草地
   ctx.fillStyle = grass;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // 草地條紋
   for (let x = 0; x < canvas.width; x += 55) {
     ctx.fillStyle = (x / 55) % 2 === 0 ? grassDark : grassLight;
     ctx.fillRect(x, 0, 55, canvas.height);
   }
 
-  // 外野弧線
   ctx.strokeStyle = "rgba(190,165,105,0.75)";
   ctx.lineWidth = 4;
   ctx.beginPath();
   ctx.arc(300, 390, 395, Math.PI * 1.08, Math.PI * 1.92);
   ctx.stroke();
 
-  // 外野邊線
   ctx.strokeStyle = "rgba(255,255,255,0.9)";
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -367,13 +363,13 @@ function drawField() {
   ctx.lineTo(620, 150);
   ctx.stroke();
 
-  // 內野土區
+  // 內野土區：放大、上緣更圓
   ctx.fillStyle = dirt;
   ctx.beginPath();
-  ctx.moveTo(125, 300);
-  ctx.quadraticCurveTo(300, 120, 475, 300);
-  ctx.quadraticCurveTo(420, 360, 300, 405);
-  ctx.quadraticCurveTo(180, 360, 125, 300);
+  ctx.moveTo(95, 315);
+  ctx.quadraticCurveTo(300, 105, 505, 315);
+  ctx.quadraticCurveTo(425, 360, 300, 410);
+  ctx.quadraticCurveTo(175, 360, 95, 315);
   ctx.closePath();
   ctx.fill();
 
@@ -381,16 +377,16 @@ function drawField() {
   ctx.fillStyle = grass;
   ctx.beginPath();
   ctx.moveTo(300, 405);
-  ctx.lineTo(205, 300);
-  ctx.lineTo(300, 205);
-  ctx.lineTo(395, 300);
+  ctx.lineTo(200, 300);
+  ctx.lineTo(300, 195);
+  ctx.lineTo(400, 300);
   ctx.closePath();
   ctx.fill();
 
-  // 本壘土圈
+  // 本壘圓形土區
   ctx.fillStyle = dirt;
   ctx.beginPath();
-  ctx.arc(300, 405, 42, Math.PI, 0);
+  ctx.arc(300, 405, 45, 0, Math.PI * 2);
   ctx.fill();
 
   // 壘線
@@ -398,22 +394,22 @@ function drawField() {
   ctx.lineWidth = 3;
   ctx.beginPath();
   ctx.moveTo(300, 405);
-  ctx.lineTo(205, 300);
-  ctx.lineTo(300, 205);
-  ctx.lineTo(395, 300);
+  ctx.lineTo(200, 300);
+  ctx.lineTo(300, 195);
+  ctx.lineTo(400, 300);
   ctx.lineTo(300, 405);
   ctx.stroke();
 
   // 壘包
   ctx.fillStyle = white;
   ctx.fillRect(292, 397, 16, 16);
-  ctx.fillRect(197, 292, 16, 16);
-  ctx.fillRect(292, 197, 16, 16);
-  ctx.fillRect(387, 292, 16, 16);
+  ctx.fillRect(192, 292, 16, 16);
+  ctx.fillRect(292, 187, 16, 16);
+  ctx.fillRect(392, 292, 16, 16);
 
   const fieldPositions = {
     "P":  { x:300, y:315, title:"P",  subtitle:"投手" },
-    "C":  { x:300, y:455, title:"C",  subtitle:"捕手" },
+    "C":  { x:300, y:475, title:"C",  subtitle:"捕手" },
     "1B": { x:455, y:310, title:"1B", subtitle:"一壘手" },
     "2B": { x:395, y:220, title:"2B", subtitle:"二壘手" },
     "3B": { x:145, y:310, title:"3B", subtitle:"三壘手" },
@@ -442,11 +438,11 @@ function drawField() {
     ctx.fillStyle = white;
     ctx.textAlign = "center";
 
-    ctx.font = "bold 21px Arial";
-    ctx.fillText(info.title, info.x, info.y - 34);
+    ctx.font = "bold 18px Arial";
+    ctx.fillText(info.title, info.x, info.y - 30);
 
-    ctx.font = "16px Arial";
-    ctx.fillText(info.subtitle, info.x, info.y - 12);
+    ctx.font = "14px Arial";
+    ctx.fillText(info.subtitle, info.x, info.y - 10);
 
     ctx.fillStyle = marker;
     ctx.beginPath();
@@ -459,7 +455,6 @@ function drawField() {
     const displayName = player.replace(/^#\d+\s*/, "");
     ctx.fillText(displayName, info.x, info.y + 22);
   });
-
 }
 </script>
 
