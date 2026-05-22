@@ -367,34 +367,38 @@ function drawField() {
   ctx.moveTo(300, 390);
   ctx.lineTo(600, 150);
   ctx.stroke();
-
-  // 內野土區：比較自然的外弧 + 壘線土路
+  
+  // 內野土區：大弧形
   ctx.fillStyle = dirt;
   ctx.beginPath();
   
-  // 從三壘外側開始
-  ctx.moveTo(155, 290);
+  // 外弧從三壘外側到一壘外側
+  ctx.moveTo(125, 300);
+  ctx.quadraticCurveTo(300, 120, 475, 300);
   
-  // 外側漂亮弧形
-  ctx.quadraticCurveTo(300, 155, 445, 290);
+  // 右側往本壘收
+  ctx.quadraticCurveTo(420, 360, 300, 405);
   
-  // 一壘側收回本壘
-  ctx.quadraticCurveTo(390, 350, 300, 390);
-  
-  // 三壘側回來
-  ctx.quadraticCurveTo(210, 350, 155, 290);
+  // 左側往三壘收
+  ctx.quadraticCurveTo(180, 360, 125, 300);
   
   ctx.closePath();
   ctx.fill();
   
-  // 讓中間草地菱形蓋回來，形成比較像球場的內野
+  // 中間草地菱形挖回來
   ctx.fillStyle = grass;
   ctx.beginPath();
-  ctx.moveTo(300, 390);
-  ctx.lineTo(205, 295);
-  ctx.lineTo(300, 200);
-  ctx.lineTo(395, 295);
+  ctx.moveTo(300, 405); // 本壘
+  ctx.lineTo(205, 300); // 三壘
+  ctx.lineTo(300, 205); // 二壘
+  ctx.lineTo(395, 300); // 一壘
   ctx.closePath();
+  ctx.fill();
+  
+  // 本壘周圍土圈
+  ctx.fillStyle = dirt;
+  ctx.beginPath();
+  ctx.arc(300, 405, 42, Math.PI, 0);
   ctx.fill();
 
   // 內野菱形草地
@@ -411,19 +415,19 @@ function drawField() {
   ctx.strokeStyle = white;
   ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.moveTo(300, 390);
-  ctx.lineTo(190, 280);
-  ctx.lineTo(300, 170);
-  ctx.lineTo(410, 280);
-  ctx.lineTo(300, 390);
+  ctx.moveTo(300, 405);
+  ctx.lineTo(205, 300);
+  ctx.lineTo(300, 205);
+  ctx.lineTo(395, 300);
+  ctx.lineTo(300, 405);
   ctx.stroke();
 
   // 壘包
   ctx.fillStyle = white;
-  ctx.fillRect(292, 382, 16, 16); // 本壘
-  ctx.fillRect(182, 272, 16, 16); // 三壘
-  ctx.fillRect(292, 162, 16, 16); // 二壘
-  ctx.fillRect(402, 272, 16, 16); // 一壘
+  ctx.fillRect(292, 397, 16, 16); // 本壘
+  ctx.fillRect(197, 292, 16, 16); // 三壘
+  ctx.fillRect(292, 197, 16, 16); // 二壘
+  ctx.fillRect(387, 292, 16, 16); // 一壘
 
   // 守備位置座標
   const fieldPositions = {
