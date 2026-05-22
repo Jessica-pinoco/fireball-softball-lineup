@@ -357,12 +357,25 @@
     // 內野大土區
     ctx.fillStyle = dirt;
     ctx.beginPath();
-    ctx.moveTo(140, 325);
-    ctx.quadraticCurveTo(300, 40, 430, 325);
-    ctx.lineTo(405, 330);
-    ctx.quadraticCurveTo(360, 390, 300, 430);
-    ctx.quadraticCurveTo(240, 390, 195, 330);
-    ctx.lineTo(140, 325);
+    
+    // 三壘側直邊起點
+    ctx.moveTo(135, 335);
+    
+    // 往上接漂亮弧線
+    ctx.lineTo(150, 305);
+    
+    // 上方大弧形
+    ctx.quadraticCurveTo(300, 35, 450, 305);
+    
+    // 一壘側直邊
+    ctx.lineTo(465, 335);
+    
+    // 右側往本壘收
+    ctx.quadraticCurveTo(390, 375, 300, 430);
+    
+    // 左側往本壘收
+    ctx.quadraticCurveTo(210, 375, 135, 335);
+    
     ctx.closePath();
     ctx.fill();
 
