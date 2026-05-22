@@ -317,180 +317,174 @@
   }
 
   function drawField() {
-    const canvas = document.getElementById("fieldCanvas");
-    const ctx = canvas.getContext("2d");
+  const canvas = document.getElementById("fieldCanvas");
+  const ctx = canvas.getContext("2d");
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const W = canvas.width;
+  const H = canvas.height;
 
-    const W = canvas.width;
-    const H = canvas.height;
+  const grassDark = "#215b30";
+  const grassLight = "#347b42";
+  const dirt = "#a36d36";
+  const white = "#ffffff";
+  const marker = "#c99b5e";
 
-    const grassDark = "#215b30";
-    const grassLight = "#347b42";
-    const dirt = "#a36d36";
-    const white = "#ffffff";
-    const marker = "#c99b5e";
+  ctx.clearRect(0, 0, W, H);
 
-    // 背景草地條紋
-    for (let x = 0; x < W; x += 55) {
-      ctx.fillStyle = (x / 55) % 2 === 0 ? grassDark : grassLight;
-      ctx.fillRect(x, 0, 55, H);
+  // 草地條紋
+  for (let x = 0; x < W; x += 55) {
+    ctx.fillStyle = (x / 55) % 2 === 0 ? grassDark : grassLight;
+    ctx.fillRect(x, 0, 55, H);
+  }
+
+  // 外野弧線
+  ctx.strokeStyle = "rgba(198,171,105,0.8)";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(300, 400, 405, Math.PI * 1.08, Math.PI * 1.92);
+  ctx.stroke();
+
+  // 邊線
+  ctx.strokeStyle = white;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(300, 410);
+  ctx.lineTo(-10, 155);
+  ctx.moveTo(300, 410);
+  ctx.lineTo(610, 155);
+  ctx.stroke();
+
+  // 內野大土區：扇形，不凸出壘線
+  ctx.fillStyle = dirt;
+  ctx.beginPath();
+
+  ctx.moveTo(145, 335);                    // 三壘側下緣
+  ctx.lineTo(190, 290);                    // 三壘側接弧線
+  ctx.quadraticCurveTo(300, 105, 410, 290); // 上方漂亮弧線
+  ctx.lineTo(455, 335);                    // 一壘側下緣
+
+  ctx.quadraticCurveTo(382, 388, 300, 430); // 右下收回本壘
+  ctx.quadraticCurveTo(218, 388, 145, 335); // 左下收回本壘
+
+  ctx.closePath();
+  ctx.fill();
+
+  // 中間草地菱形，保留條紋
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(300, 410);
+  ctx.lineTo(195, 305);
+  ctx.lineTo(300, 200);
+  ctx.lineTo(405, 305);
+  ctx.closePath();
+  ctx.clip();
+
+  for (let x = 0; x < W; x += 55) {
+    ctx.fillStyle = (x / 55) % 2 === 0 ? grassDark : grassLight;
+    ctx.fillRect(x, 0, 55, H);
+  }
+  ctx.restore();
+
+  // 二壘、一壘、三壘、本壘旁的小土弧
+  ctx.fillStyle = dirt;
+
+  ctx.beginPath();
+  ctx.arc(300, 200, 28, 0, Math.PI);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(195, 305, 28, -Math.PI / 2, Math.PI / 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(405, 305, 28, Math.PI / 2, Math.PI * 1.5);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(300, 410, 42, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 壘線
+  ctx.strokeStyle = white;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(300, 410);
+  ctx.lineTo(195, 305);
+  ctx.lineTo(300, 200);
+  ctx.lineTo(405, 305);
+  ctx.lineTo(300, 410);
+  ctx.stroke();
+
+  // 壘包
+  ctx.fillStyle = white;
+  ctx.fillRect(292, 192, 16, 16);
+  ctx.fillRect(187, 297, 16, 16);
+  ctx.fillRect(397, 297, 16, 16);
+
+  // 本壘板
+  ctx.beginPath();
+  ctx.moveTo(288, 405);
+  ctx.lineTo(312, 405);
+  ctx.lineTo(312, 418);
+  ctx.lineTo(300, 430);
+  ctx.lineTo(288, 418);
+  ctx.closePath();
+  ctx.fill();
+
+  // 打擊區
+  ctx.strokeStyle = white;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(275, 395, 14, 36);
+  ctx.strokeRect(311, 395, 14, 36);
+
+  const fieldPositions = {
+    "P":  { x:300, y:320, title:"P",  subtitle:"投手" },
+    "C":  { x:300, y:465, title:"C",  subtitle:"捕手" },
+    "1B": { x:455, y:320, title:"1B", subtitle:"一壘手" },
+    "2B": { x:390, y:230, title:"2B", subtitle:"二壘手" },
+    "3B": { x:145, y:320, title:"3B", subtitle:"三壘手" },
+    "SS": { x:215, y:230, title:"SS", subtitle:"游擊手" },
+    "10": { x:385, y:125, title:"10", subtitle:"10洞" },
+    "LF": { x:95,  y:140, title:"LF", subtitle:"左外野手" },
+    "CF": { x:300, y:75,  title:"CF", subtitle:"中外野手" },
+    "RF": { x:505, y:140, title:"RF", subtitle:"右外野手" }
+  };
+
+  const assigned = {};
+
+  for (let i = 1; i <= 11; i++) {
+    const player = getPlayerText("lineup", i);
+    const position = document.getElementById(`position${i}`).value;
+
+    if (fieldPositions[position] && player) {
+      assigned[position] = player;
     }
+  }
 
-    // 外野弧線
-    ctx.strokeStyle = "rgba(198,171,105,0.8)";
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(300, 400, 405, Math.PI * 1.08, Math.PI * 1.92);
-    ctx.stroke();
+  Object.keys(fieldPositions).forEach(pos => {
+    const info = fieldPositions[pos];
+    const player = assigned[pos] || "未排";
 
-    // 外野邊線
-    ctx.strokeStyle = white;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(300, 410);
-    ctx.lineTo(-10, 155);
-    ctx.moveTo(300, 410);
-    ctx.lineTo(610, 155);
-    ctx.stroke();
-    
-    // 內野大土區：左右對稱
-    ctx.fillStyle = dirt;
-    ctx.beginPath();
-    
-    ctx.lineTo(147, 333);                    // 左上接弧線
-    ctx.quadraticCurveTo(300, 90, 453, 333); // 上方大弧
-    ctx.lineTo(453, 333);                    // 右下
-    
-    ctx.quadraticCurveTo(383, 387, 300, 430); // 右側收回本壘
-    ctx.quadraticCurveTo(217, 387, 147, 333); // 左側收回本壘
-    
-    ctx.closePath();
-    ctx.fill();
-
-    // 中間草地菱形，保留條紋
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(300, 410);
-    ctx.lineTo(195, 305);
-    ctx.lineTo(300, 200);
-    ctx.lineTo(405, 305);
-    ctx.closePath();
-    ctx.clip();
-
-    for (let x = 0; x < W; x += 55) {
-      ctx.fillStyle = (x / 55) % 2 === 0 ? grassDark : grassLight;
-      ctx.fillRect(x, 0, 55, H);
-    }
-
-    ctx.restore();
-
-    // 壘包附近小內凹
-    ctx.fillStyle = dirt;
-
-    ctx.beginPath();
-    ctx.arc(300, 200, 28, 0, Math.PI);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(195, 305, 28, -Math.PI / 2, Math.PI / 2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(405, 305, 28, Math.PI / 2, Math.PI * 1.5);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(300, 410, 30, Math.PI, 0);
-    ctx.fill();
-
-    // 本壘圓形土區
-    ctx.fillStyle = dirt;
-    ctx.beginPath();
-    ctx.arc(300, 410, 42, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 壘線
-    ctx.strokeStyle = white;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(300, 410);
-    ctx.lineTo(195, 305);
-    ctx.lineTo(300, 200);
-    ctx.lineTo(405, 305);
-    ctx.lineTo(300, 410);
-    ctx.stroke();
-
-    // 壘包
     ctx.fillStyle = white;
-    ctx.fillRect(292, 192, 16, 16);
-    ctx.fillRect(187, 297, 16, 16);
-    ctx.fillRect(397, 297, 16, 16);
+    ctx.textAlign = "center";
 
-    // 本壘板
+    ctx.font = "bold 18px Arial";
+    ctx.fillText(info.title, info.x, info.y - 30);
+
+    ctx.font = "14px Arial";
+    ctx.fillText(info.subtitle, info.x, info.y - 10);
+
+    ctx.fillStyle = marker;
     ctx.beginPath();
-    ctx.moveTo(288, 405);
-    ctx.lineTo(312, 405);
-    ctx.lineTo(312, 418);
-    ctx.lineTo(300, 430);
-    ctx.lineTo(288, 418);
-    ctx.closePath();
+    ctx.arc(info.x, info.y + 18, 20, 0, Math.PI * 2);
     ctx.fill();
 
-    // 打擊區
-    ctx.strokeStyle = white;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(270, 395, 14, 36);
-    ctx.strokeRect(316, 395, 14, 36);
+    ctx.fillStyle = white;
+    ctx.font = "bold 11px Arial";
 
-    const fieldPositions = {
-      "P":  { x:300, y:320, title:"P",  subtitle:"投手" },
-      "C":  { x:300, y:475, title:"C",  subtitle:"捕手" },
-      "1B": { x:455, y:320, title:"1B", subtitle:"一壘手" },
-      "2B": { x:390, y:230, title:"2B", subtitle:"二壘手" },
-      "3B": { x:145, y:320, title:"3B", subtitle:"三壘手" },
-      "SS": { x:215, y:230, title:"SS", subtitle:"游擊手" },
-      "10": { x:385, y:125, title:"10", subtitle:"10洞" },
-      "LF": { x:95,  y:140, title:"LF", subtitle:"左外野手" },
-      "CF": { x:300, y:75,  title:"CF", subtitle:"中外野手" },
-      "RF": { x:505, y:140, title:"RF", subtitle:"右外野手" }
-    };
-
-    const assigned = {};
-
-    for (let i = 1; i <= 11; i++) {
-      const player = getPlayerText("lineup", i);
-      const position = document.getElementById(`position${i}`).value;
-
-      if (fieldPositions[position] && player) {
-        assigned[position] = player;
-      }
-    }
-
-    Object.keys(fieldPositions).forEach(pos => {
-      const info = fieldPositions[pos];
-      const player = assigned[pos] || "未排";
-
-      ctx.fillStyle = white;
-      ctx.textAlign = "center";
-
-      ctx.font = "bold 18px Arial";
-      ctx.fillText(info.title, info.x, info.y - 30);
-
-      ctx.font = "14px Arial";
-      ctx.fillText(info.subtitle, info.x, info.y - 10);
-
-      ctx.fillStyle = marker;
-      ctx.beginPath();
-      ctx.arc(info.x, info.y + 18, 20, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = white;
-      ctx.font = "bold 11px Arial";
-
-      const displayName = player.replace(/^#\d+\s*/, "");
-      ctx.fillText(displayName, info.x, info.y + 22);
-    });
+    const displayName = player.replace(/^#\d+\s*/, "");
+    ctx.fillText(displayName, info.x, info.y + 22);
+  });
   }
 
   function downloadFieldImage() {
