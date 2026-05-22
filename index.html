@@ -368,13 +368,32 @@ function drawField() {
   ctx.lineTo(600, 150);
   ctx.stroke();
 
-  // 內野土區大弧形
+  // 內野土區：比較自然的外弧 + 壘線土路
   ctx.fillStyle = dirt;
   ctx.beginPath();
-  ctx.arc(300, 330, 210, Math.PI * 1.05, Math.PI * 1.95);
-  ctx.lineTo(410, 280);
-  ctx.lineTo(300, 390);
-  ctx.lineTo(190, 280);
+  
+  // 從三壘外側開始
+  ctx.moveTo(155, 290);
+  
+  // 外側漂亮弧形
+  ctx.quadraticCurveTo(300, 155, 445, 290);
+  
+  // 一壘側收回本壘
+  ctx.quadraticCurveTo(390, 350, 300, 390);
+  
+  // 三壘側回來
+  ctx.quadraticCurveTo(210, 350, 155, 290);
+  
+  ctx.closePath();
+  ctx.fill();
+  
+  // 讓中間草地菱形蓋回來，形成比較像球場的內野
+  ctx.fillStyle = grass;
+  ctx.beginPath();
+  ctx.moveTo(300, 390);
+  ctx.lineTo(205, 295);
+  ctx.lineTo(300, 200);
+  ctx.lineTo(395, 295);
   ctx.closePath();
   ctx.fill();
 
@@ -459,11 +478,6 @@ function drawField() {
     ctx.fillText(displayName, info.x, info.y + 23);
   });
 
-  // 標題
-  ctx.fillStyle = white;
-  ctx.font = "bold 24px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText("Fireball 守備位置圖", 300, 30);
 }
 </script>
 
