@@ -358,13 +358,12 @@
     ctx.fillStyle = dirt;
     ctx.beginPath();
     
-    ctx.moveTo(155, 335);                    // 左下
-    ctx.lineTo(170, 200);                    // 左上接弧線
-    ctx.quadraticCurveTo(300, 30, 400, 200); // 上方大弧
-    ctx.lineTo(445, 335);                    // 右下
+    ctx.lineTo(147, 333);                    // 左上接弧線
+    ctx.quadraticCurveTo(300, 90, 453, 333); // 上方大弧
+    ctx.lineTo(453, 333);                    // 右下
     
-    ctx.quadraticCurveTo(385, 390, 300, 430); // 右側收回本壘
-    ctx.quadraticCurveTo(215, 390, 155, 335); // 左側收回本壘
+    ctx.quadraticCurveTo(383, 387, 300, 430); // 右側收回本壘
+    ctx.quadraticCurveTo(217, 387, 147, 333); // 左側收回本壘
     
     ctx.closePath();
     ctx.fill();
