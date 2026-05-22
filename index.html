@@ -369,8 +369,8 @@
   ctx.beginPath();
   ctx.moveTo(405, 305);
   ctx.lineTo(300, 410);
-  ctx.lineTo(335, 410);
-  ctx.lineTo(405, 305);
+  ctx.lineTo(320, 410);
+  ctx.lineTo(385, 345);
   ctx.closePath();
   ctx.fill();
     
@@ -378,15 +378,15 @@
   ctx.beginPath();
   ctx.moveTo(195, 305);
   ctx.lineTo(300, 410);
-  ctx.lineTo(265, 410);
-  ctx.lineTo(195, 305);
+  ctx.lineTo(280, 410);
+  ctx.lineTo(215, 345);
   ctx.closePath();
   ctx.fill();
-
-// 本壘圓形土區
-ctx.beginPath();
-ctx.arc(300, 410, 42, 0, Math.PI * 2);
-ctx.fill();
+    
+  // 本壘圓形土區
+  ctx.beginPath();
+  ctx.arc(300, 410, 42, 0, Math.PI * 2);
+  ctx.fill();
 
   // 中間草地菱形，保留條紋
   ctx.save();
@@ -439,7 +439,7 @@ ctx.fill();
 
   const fieldPositions = {
     "P":  { x:300, y:320, title:"P",  subtitle:"投手" },
-    "C":  { x:300, y:465, title:"C",  subtitle:"捕手" },
+    "C":  { x:300, y:475, title:"C",  subtitle:"捕手" },
     "1B": { x:455, y:320, title:"1B", subtitle:"一壘手" },
     "2B": { x:390, y:230, title:"2B", subtitle:"二壘手" },
     "3B": { x:145, y:320, title:"3B", subtitle:"三壘手" },
