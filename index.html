@@ -362,14 +362,23 @@ function drawField() {
   ctx.moveTo(300, 405);
   ctx.lineTo(620, 150);
   ctx.stroke();
-
-  // 內野土區：放大、上緣更圓
+  
+  // 內野土區：寬大的漂亮弧形，涵蓋 SS / 2B
   ctx.fillStyle = dirt;
   ctx.beginPath();
+  
+  // 左下起點
   ctx.moveTo(95, 315);
-  ctx.quadraticCurveTo(300, 105, 505, 315);
-  ctx.quadraticCurveTo(425, 360, 300, 410);
-  ctx.quadraticCurveTo(175, 360, 95, 315);
+  
+  // 上緣大弧形，拉高並放寬
+  ctx.quadraticCurveTo(300, 85, 505, 315);
+  
+  // 右側往本壘附近收
+  ctx.quadraticCurveTo(430, 375, 300, 420);
+  
+  // 左側往本壘附近收
+  ctx.quadraticCurveTo(170, 375, 95, 315);
+  
   ctx.closePath();
   ctx.fill();
 
@@ -410,10 +419,10 @@ function drawField() {
   const fieldPositions = {
     "P":  { x:300, y:315, title:"P",  subtitle:"投手" },
     "C":  { x:300, y:475, title:"C",  subtitle:"捕手" },
-    "1B": { x:455, y:310, title:"1B", subtitle:"一壘手" },
-    "2B": { x:395, y:220, title:"2B", subtitle:"二壘手" },
-    "3B": { x:145, y:310, title:"3B", subtitle:"三壘手" },
-    "SS": { x:215, y:220, title:"SS", subtitle:"游擊手" },
+    "1B": { x:450, y:310, title:"1B", subtitle:"一壘手" },
+    "2B": { x:395, y:230, title:"2B", subtitle:"二壘手" },
+    "3B": { x:155, y:310, title:"3B", subtitle:"三壘手" },
+    "SS": { x:215, y:230, title:"SS", subtitle:"游擊手" },
     "10": { x:385, y:125, title:"10", subtitle:"10洞" },
     "LF": { x:95,  y:135, title:"LF", subtitle:"左外野手" },
     "CF": { x:300, y:75,  title:"CF", subtitle:"中外野手" },
