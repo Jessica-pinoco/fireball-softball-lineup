@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>Fireball Stats</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      color: #d62828;
+    }
+
+    .section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+
+    input, button {
+      padding: 8px;
+      margin: 4px;
+    }
+
+    input {
+      width: 80%;
+    }
+
+    button {
+      cursor: pointer;
+      border: 0;
+      border-radius: 8px;
+      background: #0C2340;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>📊 Fireball 球員數據</h1>
+
+<div class="section">
+  <button onclick="location.href='index.html'">⬅️ 回排棒頁</button>
+</div>
+
+<div class="section">
+  <h2>本場比賽資訊</h2>
+  <p>比賽日期：<input id="gameDate" type="date"></p>
+  <p>對手隊名：<input id="opponent" type="text" placeholder="請輸入對手"></p>
+</div>
+
+<div class="section">
+  <h2>輸入本場數據</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>球員</th>
+        <th>本場打數 AB</th>
+        <th>本場安打 H</th>
+        <th>目前累積 AVG</th>
+      </tr>
+    </thead>
+    <tbody id="statsTable"></tbody>
+  </table>
+
+  <br>
+  <button onclick="saveGameStats()">💾 儲存本場數據</button>
+</div>
+
+<script>
+  let players = [
+    { text: "#1 林升權", AB: 0, H: 0 },
+    { text: "#2 簡于翔", AB: 0, H: 0 },
+    { text: "#7 林申富", AB: 0, H: 0 },
+    { text: "#11 黃博彥", AB: 0, H: 0 },
+    { text: "#13 李國豪", AB: 0, H: 0 },
+    { text: "#19 林展廷", AB: 0, H: 0 },
+    { text: "#24 朱祐陞", AB: 0, H: 0 },
+    { text: "#26 黃煜彬", AB: 0, H: 0 },
+    { text: "#31 吳旻育", AB: 0, H: 0 },
+    { text: "#42 林暐晉", AB: 0, H: 0 },
+    { text: "#44 黃顏維霆", AB: 0, H: 0 },
+    { text: "#55 賴泱佐", AB: 0, H: 0 },
+    { text: "#69 曾鈺淀", AB: 0, H: 0 },
+    { text: "#72 黃顏斌丞", AB: 0, H: 0 },
+    { text: "#97 黃顏維辰", AB: 0, H: 0 },
+    { text: "#99 簡崇恩", AB: 0, H: 0 }
+  ];
+
+  function calculateAVG(player) {
+    if (!player.AB || player.AB === 0) return ".000";
+    return (player.H / player.AB).toFixed(3).replace(/^0/, "");
+  }
+
+  function loadSavedStats() {
+    const savedStats = localStorage.getItem("fireballPlayerStats");
+
+    if (savedStats) {
+      players = JSON.parse(savedStats);
+    }
+  }
+
+  function renderStatsTable() {
+    const table = document.getElementById("statsTable");
+    table.innerHTML = "";
+
+    players.forEach((player, index) => {
+      table.innerHTML += `
+        <tr>
+          <td>${player.text}</td>
+          <td><input id="gameAB${index}" type="number" min="0" value="0"></td>
+          <td><input id="gameH${index}" type="number" min="0" value="0"></td>
+          <td>${calculateAVG(player)}</td>
+        </tr>
+      `;
+    });
+  }
+
+  function saveGameStats() {
+    players.forEach((player, index) => {
+      const gameAB = Number(document.getElementById(`gameAB${index}`).value || 0);
+      const gameH = Number(document.getElementById(`gameH${index}`).value || 0);
+
+      player.AB += gameAB;
+      player.H += gameH;
+    });
+
+    localStorage.setItem("fireballPlayerStats", JSON.stringify(players));
+
+    alert("已儲存本場數據！");
+    renderStatsTable();
+  }
+
+  loadSavedStats();
+  renderStatsTable();
+</script>
+
+</body>
+</html>
