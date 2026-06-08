@@ -32,9 +32,7 @@
       border-radius: 999px;
     }
 
-    .topStatsBtn:hover {
-      background: #eeeeee;
-    }
+    .topStatsBtn:hover { background: #eeeeee; }
 
     .deleteBtn { background: #d62828; }
   </style>
@@ -92,6 +90,8 @@
 </div>
 
 <script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbzy5_vTQ4XLUf32U7iHvw5JvNbH4H6z1cXPLo5XqKAEhSK0v555UAVJh5qJw6RVf7w/exec";
+
   const players = [
     "#1 林升權",
     "#2 簡于翔",
@@ -133,7 +133,7 @@
     });
   }
 
-  function saveGameRecord() {
+  async function saveGameRecord() {
     const date = document.getElementById("gameDate").value;
     const opponent = document.getElementById("opponent").value.trim();
 
@@ -142,7 +142,7 @@
       return;
     }
 
-    const stats = [];
+    const records = [];
     let hasError = false;
 
     players.forEach((player, index) => {
@@ -156,29 +156,29 @@
       }
 
       if (AB > 0 || H > 0) {
-        stats.push({ player, AB, H });
+        records.push({ date, opponent, player, AB, H });
       }
     });
 
     if (hasError) return;
 
-    if (stats.length === 0) {
+    if (records.length === 0) {
       alert("請至少輸入一位球員的本場數據");
       return;
     }
 
-    const record = {
-      id: Date.now(),
-      date,
-      opponent,
-      stats
-    };
+    try {
+      await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ records })
+      });
 
-    gameRecords.push(record);
-    localStorage.setItem("fireballGameRecords", JSON.stringify(gameRecords));
-
-    alert("已儲存本場紀錄！");
-    renderAll();
+      alert("已儲存到 Google Sheet！");
+      await loadCloudData();
+    } catch (error) {
+      alert("儲存失敗，請稍後再試");
+      console.error(error);
+    }
   }
 
   function getPlayerSummary() {
@@ -222,8 +222,6 @@
         </tr>
       `;
     });
-
-    localStorage.setItem("fireballPlayerSummary", JSON.stringify(summary));
   }
 
   function renderHistoryList() {
@@ -263,22 +261,9 @@
               </thead>
               <tbody>${rows}</tbody>
             </table>
-
-            <button class="deleteBtn" onclick="deleteGameRecord(${record.id})">
-              🗑️ 刪除這場紀錄
-            </button>
           </div>
         `;
       });
-  }
-
-  function deleteGameRecord(id) {
-    if (!confirm("確定要刪除這場紀錄嗎？")) return;
-
-    gameRecords = gameRecords.filter(record => record.id !== id);
-    localStorage.setItem("fireballGameRecords", JSON.stringify(gameRecords));
-
-    renderAll();
   }
 
   function renderAll() {
@@ -288,20 +273,45 @@
   }
 
   async function loadCloudData() {
-  try {
-    const response = await fetch("data.json?time=" + Date.now());
-    const data = await response.json();
+    try {
+      const response = await fetch(API_URL);
+      const rows = await response.json();
 
-    gameRecords = data.gameRecords || [];
-    renderAll();
-  } catch (error) {
-    alert("讀取 data.json 失敗");
-    console.error(error);
-    renderAll();
+      gameRecords = [];
+
+      const grouped = {};
+
+      rows.forEach(row => {
+        if (!row.date || !row.player) return;
+
+        const key = `${row.date}_${row.opponent}`;
+
+        if (!grouped[key]) {
+          grouped[key] = {
+            id: key,
+            date: row.date,
+            opponent: row.opponent,
+            stats: []
+          };
+        }
+
+        grouped[key].stats.push({
+          player: row.player,
+          AB: Number(row.AB || 0),
+          H: Number(row.H || 0)
+        });
+      });
+
+      gameRecords = Object.values(grouped);
+      renderAll();
+    } catch (error) {
+      alert("讀取 Google Sheet 失敗");
+      console.error(error);
+      renderAll();
+    }
   }
-}
 
-loadCloudData();
+  loadCloudData();
 </script>
 
 </body>
