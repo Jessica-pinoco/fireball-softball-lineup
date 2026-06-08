@@ -71,6 +71,22 @@
       font-weight: bold;
       margin-top: 10px;
     }
+    
+    .topStatsBtn {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: transparent;
+      color: #666;
+      font-size: 13px;
+      font-weight: normal;
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 999px;
+}
+    .topStatsBtn:hover {
+      background: #eeeeee;
+}
 
     canvas {
       max-width: 100%;
@@ -81,7 +97,11 @@
 </head>
 
 <body>
-
+  
+<button class="topStatsBtn" onclick="window.location.href='stats.html'">
+  📊 數據管理
+</button>
+  
 <h1>⚾️ Fireball Lineup 🔥</h1>
 
 <div class="section">
