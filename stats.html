@@ -184,8 +184,11 @@
     await fetch(API_URL, {
       method: "POST",
       mode: "no-cors",
-      body: JSON.stringify({ records })
-    });
+      headers: {
+    "Content-Type": "text/plain"
+  },
+  body: JSON.stringify({ records })
+});
 
     alert("已儲存到 Google Sheet！");
     renderGameStatsTable();
