@@ -211,8 +211,8 @@
       `最近儲存：${data.saveTime}`;
     alert("已儲存目前棒次！");
 }
-
-function loadLineup() {
+  
+  function loadLineup() {
   const saved = localStorage.getItem("fireballLineup");
 
   if (!saved) {
@@ -247,6 +247,11 @@ function loadLineup() {
     document.getElementById(`benchName${i}`).value = item.name || "";
 
     handlePlayerChange("bench", i);
+  }
+
+  if (data.saveTime) {
+    document.getElementById("saveTimeText").textContent =
+      `最近儲存：${data.saveTime}`;
   }
 
   checkDuplicates();
@@ -628,15 +633,8 @@ function loadLineup() {
   if (data.saveTime) {
     document.getElementById("saveTimeText").textContent =
       `最近儲存：${data.saveTime}`;
+    
   }
-});
-  }
-  if (data.saveTime) {
-  document.getElementById("saveTimeText").textContent =
-    `最近儲存：${data.saveTime}`;
-  }
-  checkDuplicates();
-  alert("已帶入前次紀錄！");
 });
 </script>
 
