@@ -278,11 +278,19 @@
 
   const positions = ["P", "C", "1B", "2B", "3B", "SS", "10", "LF", "CF", "RF", "EP"];
 
+  function calculateAVG(player) {
+  if (!player.AB || player.AB === 0) return ".000";
+  return (player.H / player.AB).toFixed(3).replace(/^0/, "");
+  }
+  
   function playerOptions() {
-    return `
-      <option value="">請選擇球員</option>
-      ${players.map(player => `<option value="${player.text}">${player.text} (${avg})</option>`).join("")}
-      <option value="manual">➕ 手動輸入球員</option>
+  return `
+    <option value="">請選擇球員</option>
+    ${players.map(player => {
+      const avg = calculateAVG(player);
+      return `<option value="${player.text}">${player.text} (${avg})</option>`;
+    }).join("")}
+    <option value="manual">➕ 手動輸入球員</option>
     `;
   }
 
