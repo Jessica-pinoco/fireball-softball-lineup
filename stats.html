@@ -134,54 +134,66 @@
   }
 
   async function saveGameRecord() {
-    const date = document.getElementById("gameDate").value;
-    const opponent = document.getElementById("opponent").value.trim();
+  const date = document.getElementById("gameDate").value;
+  const opponent = document.getElementById("opponent").value.trim();
 
-    if (!date) {
-      alert("請先填比賽日期");
-      return;
-    }
-
-    const records = [];
-    let hasError = false;
-
-    players.forEach((player, index) => {
-      const AB = Number(document.getElementById(`ab${index}`).value || 0);
-      const H = Number(document.getElementById(`h${index}`).value || 0);
-
-      if (H > AB) {
-        alert(`${player} 的安打數不能大於打數`);
-        hasError = true;
-        return;
-      }
-
-      if (AB > 0 || H > 0) {
-        records.push({ date, opponent, player, AB, H });
-      }
-    });
-
-    if (hasError) return;
-
-    if (records.length === 0) {
-      alert("請至少輸入一位球員的本場數據");
-      return;
-    }
-
-    try {
-      await fetch(API_URL, {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify({ records })
-      });
-
-      alert("已儲存到 Google Sheet！");
-      await loadCloudData();
-    } catch (error) {
-      alert("儲存失敗，請稍後再試");
-      console.error(error);
-    }
+  if (!date) {
+    alert("請先填比賽日期");
+    return;
   }
 
+  const records = [];
+  const stats = [];
+  let hasError = false;
+
+  players.forEach((player, index) => {
+    const AB = Number(document.getElementById(`ab${index}`).value || 0);
+    const H = Number(document.getElementById(`h${index}`).value || 0);
+
+    if (H > AB) {
+      alert(`${player} 的安打數不能大於打數`);
+      hasError = true;
+      return;
+    }
+
+    if (AB > 0 || H > 0) {
+      records.push({ date, opponent, player, AB, H });
+      stats.push({ player, AB, H });
+    }
+  });
+
+  if (hasError) return;
+
+  if (records.length === 0) {
+    alert("請至少輸入一位球員的本場數據");
+    return;
+  }
+
+  // 先更新畫面
+  gameRecords.push({
+    id: Date.now(),
+    date,
+    opponent,
+    stats
+  });
+
+  renderSummaryTable();
+  renderHistoryList();
+
+  try {
+    await fetch(API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify({ records })
+    });
+
+    alert("已儲存到 Google Sheet！");
+    renderGameStatsTable();
+  } catch (error) {
+    alert("儲存失敗，請稍後再試");
+    console.error(error);
+  }
+}
   function getPlayerSummary() {
     const summary = {};
 
