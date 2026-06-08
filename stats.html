@@ -273,46 +273,56 @@
     renderHistoryList();
   }
 
-  async function loadCloudData() {
-    try {
-      const response = await fetch(API_URL);
-      const rows = await response.json();
+async function loadCloudData() {
+  try {
+    const response = await fetch(API_URL);
 
-      gameRecords = [];
-
-      const grouped = {};
-
-      rows.forEach(row => {
-        if (!row.date || !row.player) return;
-
-        const key = `${row.date}_${row.opponent}`;
-
-        if (!grouped[key]) {
-          grouped[key] = {
-            id: key,
-            date: row.date,
-            opponent: row.opponent,
-            stats: []
-          };
-        }
-
-        grouped[key].stats.push({
-          player: row.player,
-          AB: Number(row.AB || 0),
-          H: Number(row.H || 0)
-        });
-      });
-
-      gameRecords = Object.values(grouped);
-      renderAll();
-    } catch (error) {
-      alert("讀取 Google Sheet 失敗");
-      console.error(error);
-      renderAll();
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
     }
-  }
 
-  loadCloudData();
+    const rows = await response.json();
+
+    gameRecords = [];
+
+    const grouped = {};
+
+    rows.forEach(row => {
+      if (!row.date || !row.player) return;
+
+      const key = `${row.date}_${row.opponent}`;
+
+      if (!grouped[key]) {
+        grouped[key] = {
+          id: key,
+          date: row.date,
+          opponent: row.opponent,
+          stats: []
+        };
+      }
+
+      grouped[key].stats.push({
+        player: row.player,
+        AB: Number(row.AB || 0),
+        H: Number(row.H || 0)
+      });
+    });
+
+    gameRecords = Object.values(grouped);
+
+    renderSummaryTable();
+    renderHistoryList();
+
+  } catch (error) {
+    console.error("讀取 Google Sheet 失敗：", error);
+  }
+}
+
+// 先畫出畫面
+renderAll();
+
+// 再讀取雲端資料
+loadCloudData();
 </script>
 
 </body>
