@@ -110,6 +110,7 @@
     <div>
       <button class="saveandloadBtn" onclick="saveLineup()">💾 儲存目前棒次</button>
       <button class="saveandloadBtn" onclick="loadLineup()">📂 帶入前次紀錄</button>
+      <span id="saveTimeText" style="margin-left:12px; color:#666; font-size:14px;"></span>
     </div>
   </div>
 
@@ -167,6 +168,7 @@
     gameDate: document.getElementById("gameDate").value,
     opponent: document.getElementById("opponent").value,
     homeAway: document.getElementById("homeAway").value,
+    saveTime: new Date().toLocaleString("zh-TW"),
     lineup: [],
     bench: []
   };
@@ -187,9 +189,11 @@
       name: document.getElementById(`benchName${i}`).value
     });
   }
-
-  localStorage.setItem("fireballLineup", JSON.stringify(data));
-  alert("已儲存目前棒次！");
+    
+    localStorage.setItem("fireballLineup", JSON.stringify(data));
+    document.getElementById("saveTimeText").textContent =
+      `最近儲存：${data.saveTime}`;
+    alert("已儲存目前棒次！");
 }
 
 function loadLineup() {
@@ -597,6 +601,19 @@ function loadLineup() {
     link.href = canvas.toDataURL("image/png");
     link.click();
   }
+  
+  window.addEventListener("DOMContentLoaded", () => {
+  const saved = localStorage.getItem("fireballLineup");
+
+  if (!saved) return;
+
+  const data = JSON.parse(saved);
+
+  if (data.saveTime) {
+    document.getElementById("saveTimeText").textContent =
+      `最近儲存：${data.saveTime}`;
+  }
+});
 </script>
 
 </body>
