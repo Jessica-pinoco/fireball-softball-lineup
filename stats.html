@@ -111,7 +111,7 @@
     "#99 簡崇恩"
   ];
 
-  let gameRecords = JSON.parse(localStorage.getItem("fireballGameRecords")) || [];
+  let gameRecords = [];
 
   function calculateAVG(H, AB) {
     if (!AB || AB === 0) return ".000";
@@ -287,7 +287,21 @@
     renderHistoryList();
   }
 
-  renderAll();
+  async function loadCloudData() {
+  try {
+    const response = await fetch("data.json?time=" + Date.now());
+    const data = await response.json();
+
+    gameRecords = data.gameRecords || [];
+    renderAll();
+  } catch (error) {
+    alert("讀取 data.json 失敗");
+    console.error(error);
+    renderAll();
+  }
+}
+
+loadCloudData();
 </script>
 
 </body>
