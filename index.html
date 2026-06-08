@@ -97,7 +97,18 @@
 </div>
 
 <div class="section">
-  <h2>先發名單</h2>
+  <div style="display:flex;
+              justify-content:space-between;
+              align-items:center;
+              margin-bottom:10px;">
+
+    <h2 style="margin:0;">先發名單</h2>
+
+    <div>
+      <button onclick="saveLineup()">💾 儲存目前棒次</button>
+      <button onclick="loadLineup()">📂 帶入前次紀錄</button>
+    </div>
+  </div>
 
   <table>
     <thead>
@@ -148,6 +159,76 @@
 </div>
 
 <script>
+  function saveLineup() {
+  const data = {
+    gameDate: document.getElementById("gameDate").value,
+    opponent: document.getElementById("opponent").value,
+    homeAway: document.getElementById("homeAway").value,
+    lineup: [],
+    bench: []
+  };
+
+  for (let i = 1; i <= 11; i++) {
+    data.lineup.push({
+      player: document.getElementById(`lineupPlayer${i}`).value,
+      number: document.getElementById(`lineupNumber${i}`).value,
+      name: document.getElementById(`lineupName${i}`).value,
+      position: document.getElementById(`position${i}`).value
+    });
+  }
+
+  for (let i = 1; i <= 6; i++) {
+    data.bench.push({
+      player: document.getElementById(`benchPlayer${i}`).value,
+      number: document.getElementById(`benchNumber${i}`).value,
+      name: document.getElementById(`benchName${i}`).value
+    });
+  }
+
+  localStorage.setItem("fireballLineup", JSON.stringify(data));
+  alert("已儲存目前棒次！");
+}
+
+function loadLineup() {
+  const saved = localStorage.getItem("fireballLineup");
+
+  if (!saved) {
+    alert("目前沒有前次紀錄");
+    return;
+  }
+
+  const data = JSON.parse(saved);
+
+  document.getElementById("gameDate").value = data.gameDate || "";
+  document.getElementById("opponent").value = data.opponent || "";
+  document.getElementById("homeAway").value = data.homeAway || "先攻";
+
+  for (let i = 1; i <= 11; i++) {
+    const item = data.lineup[i - 1];
+    if (!item) continue;
+
+    document.getElementById(`lineupPlayer${i}`).value = item.player || "";
+    document.getElementById(`lineupNumber${i}`).value = item.number || "";
+    document.getElementById(`lineupName${i}`).value = item.name || "";
+    document.getElementById(`position${i}`).value = item.position || "";
+
+    handlePlayerChange("lineup", i);
+  }
+
+  for (let i = 1; i <= 6; i++) {
+    const item = data.bench[i - 1];
+    if (!item) continue;
+
+    document.getElementById(`benchPlayer${i}`).value = item.player || "";
+    document.getElementById(`benchNumber${i}`).value = item.number || "";
+    document.getElementById(`benchName${i}`).value = item.name || "";
+
+    handlePlayerChange("bench", i);
+  }
+
+  checkDuplicates();
+  alert("已帶入前次紀錄！");
+}
   const players = [
     "#1 林升權",
     "#2 簡于翔",
@@ -417,7 +498,7 @@
   // 三壘土丘
   ctx.fillStyle = dirt;
   ctx.beginPath();
-  ctx.arc(195, 305, 32, 0, -Math.PI*0.75, Math.PI*1.25);
+  ctx.arc(195, 305, 32, -Math.PI * 0.75, Math.PI * 0.25, false);
   ctx.fill();
     
   // 壘線
