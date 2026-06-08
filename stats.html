@@ -70,7 +70,7 @@
 
 <div class="section">
   <h2>累積打擊率</h2>
-  <button onclick="loadCloudData()">🔄 重新讀取 Google Sheet</button>
+  <button onclick="loadCloudData()">🔄 重新整理</button>
 
   <table>
     <thead>
@@ -176,7 +176,7 @@
         body: JSON.stringify({ records })
       });
 
-      alert("已送出到 Google Sheet！");
+      alert("已儲存！");
       await loadCloudData();
       renderGameStatsTable();
 
@@ -201,7 +201,7 @@
         })
       });
 
-      alert("已送出刪除請求！");
+      alert("已刪除！");
       await loadCloudData();
 
     } catch (error) {
