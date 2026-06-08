@@ -277,6 +277,9 @@
   checkDuplicates();
   alert("已帶入前次紀錄！");
 }
+  const API_URL = "https://script.google.com/macros/s/AKfycbzy5_vTQ4XLUf32U7iHvw5JvNbH4H6z1cXPLo5XqKAEhSK0v555UAVJh5qJw6RVf7w/exec";
+  let playerSummary = {};
+  
   const players = [
     { text: "#1 林升權", AB: 0, H: 0 },
     { text: "#2 簡于翔", AB: 0, H: 0 },
@@ -303,16 +306,25 @@
   return (player.H / player.AB).toFixed(3).replace(/^0/, "");
   }
   
+  function getPlayerAVG(playerText) {
+  const data = playerSummary[playerText];
+
+  if (!data || !data.AB || data.AB === 0) return ".000";
+
+  return (data.H / data.AB).toFixed(3).replace(/^0/, "");
+}
+  
   function playerOptions() {
   return `
     <option value="">請選擇球員</option>
     ${players.map(player => {
-      const avg = calculateAVG(player);
-      return `<option value="${player.text}">${player.text} (${avg})</option>`;
+      const playerText = player.text || player;
+      const avg = getPlayerAVG(playerText);
+      return `<option value="${playerText}">${playerText} (${avg})</option>`;
     }).join("")}
     <option value="manual">➕ 手動輸入球員</option>
-    `;
-  }
+  `;
+}
 
   function positionOptions() {
     return `
@@ -651,18 +663,52 @@
     link.click();
   }
   
-  window.addEventListener("DOMContentLoaded", () => {
+  async function loadPlayerSummaryFromSheet() {
+  try {
+    const response = await fetch(API_URL + "?time=" + Date.now());
+    const rows = await response.json();
+
+    playerSummary = {};
+
+    rows.forEach(row => {
+      if (!row.player) return;
+
+      if (!playerSummary[row.player]) {
+        playerSummary[row.player] = { AB: 0, H: 0 };
+      }
+
+      playerSummary[row.player].AB += Number(row.AB || 0);
+      playerSummary[row.player].H += Number(row.H || 0);
+    });
+
+    refreshPlayerDropdowns();
+
+  } catch (error) {
+    console.error("讀取球員打擊率失敗", error);
+  }
+}
+
+function refreshPlayerDropdowns() {
+  document.querySelectorAll(".playerSelect").forEach(select => {
+    const currentValue = select.value;
+    select.innerHTML = playerOptions();
+    select.value = currentValue;
+  });
+}
+
+window.addEventListener("DOMContentLoaded", () => {
   const saved = localStorage.getItem("fireballLineup");
 
-  if (!saved) return;
+  if (saved) {
+    const data = JSON.parse(saved);
 
-  const data = JSON.parse(saved);
-
-  if (data.saveTime) {
-    document.getElementById("saveTimeText").textContent =
-      `最近儲存：${data.saveTime}`;
-    
+    if (data.saveTime) {
+      document.getElementById("saveTimeText").textContent =
+        `最近儲存：${data.saveTime}`;
+    }
   }
+
+  loadPlayerSummaryFromSheet();
 });
 </script>
 
