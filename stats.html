@@ -312,13 +312,20 @@
 
       gameRecords = [];
       const grouped = {};
+      
+  rows.forEach(row => {
+      if (!row.date || !row.player) return;
+      
+      let date = String(row.date);
+      
+      if (date.includes("T")) {
+        const d = new Date(date);
+        const taiwanDate = new Date(d.getTime() + 8 * 60 * 60 * 1000);
+        date = taiwanDate.toISOString().slice(0, 10);
+  }
 
-      rows.forEach(row => {
-        if (!row.date || !row.player) return;
-
-        const date = String(row.date);
-        const opponent = row.opponent || "";
-        const key = `${date}_${opponent}`;
+  const opponent = row.opponent || "";
+  const key = `${date}_${opponent}`;
 
         if (!grouped[key]) {
           grouped[key] = {
