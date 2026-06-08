@@ -629,6 +629,12 @@ function loadLineup() {
     document.getElementById("saveTimeText").textContent =
       `最近儲存：${data.saveTime}`;
   }
+});
+  }
+  if (data.saveTime) {
+  document.getElementById("saveTimeText").textContent =
+    `最近儲存：${data.saveTime}`;
+  }
   checkDuplicates();
   alert("已帶入前次紀錄！");
 });
