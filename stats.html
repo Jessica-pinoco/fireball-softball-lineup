@@ -316,7 +316,7 @@
       rows.forEach(row => {
         if (!row.date || !row.player) return;
 
-        const date = String(row.date).slice(0, 10);
+        const date = String(row.date);
         const opponent = row.opponent || "";
         const key = `${date}_${opponent}`;
 
