@@ -12,6 +12,7 @@
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
     input, button { padding: 8px; margin: 4px; }
     input { width: 80%; }
+
     button {
       cursor: pointer;
       border: 0;
@@ -20,18 +21,33 @@
       color: white;
       font-weight: bold;
     }
+
+    .topStatsBtn {
+      background: transparent;
+      color: #666;
+      font-size: 13px;
+      font-weight: normal;
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 999px;
+    }
+
+    .topStatsBtn:hover {
+      background: #eeeeee;
+    }
+
     .deleteBtn { background: #d62828; }
   </style>
 </head>
 
 <body>
 
-<h1>📊 Fireball 數據管理</h1>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+  <h1 style="margin:0;">📊 Fireball 數據管理</h1>
 
-<div class="section">
-  <button class="topStatsBtn"
-        onclick="location.href='index.html'">
+  <button class="topStatsBtn" onclick="location.href='index.html'">
     ⬅️ 回排棒頁
+  </button>
 </div>
 
 <div class="section">
@@ -127,6 +143,7 @@
     }
 
     const stats = [];
+    let hasError = false;
 
     players.forEach((player, index) => {
       const AB = Number(document.getElementById(`ab${index}`).value || 0);
@@ -134,6 +151,7 @@
 
       if (H > AB) {
         alert(`${player} 的安打數不能大於打數`);
+        hasError = true;
         return;
       }
 
@@ -141,6 +159,8 @@
         stats.push({ player, AB, H });
       }
     });
+
+    if (hasError) return;
 
     if (stats.length === 0) {
       alert("請至少輸入一位球員的本場數據");
