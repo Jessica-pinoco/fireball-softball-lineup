@@ -70,6 +70,7 @@
 
 <div class="section">
   <h2>累積打擊率</h2>
+  <button onclick="loadCloudData()">🔄 重新讀取 Google Sheet</button>
 
   <table>
     <thead>
@@ -134,69 +135,81 @@
   }
 
   async function saveGameRecord() {
-  const date = document.getElementById("gameDate").value;
-  const opponent = document.getElementById("opponent").value.trim();
+    const date = document.getElementById("gameDate").value;
+    const opponent = document.getElementById("opponent").value.trim();
 
-  if (!date) {
-    alert("請先填比賽日期");
-    return;
-  }
-
-  const records = [];
-  const stats = [];
-  let hasError = false;
-
-  players.forEach((player, index) => {
-    const AB = Number(document.getElementById(`ab${index}`).value || 0);
-    const H = Number(document.getElementById(`h${index}`).value || 0);
-
-    if (H > AB) {
-      alert(`${player} 的安打數不能大於打數`);
-      hasError = true;
+    if (!date) {
+      alert("請先填比賽日期");
       return;
     }
 
-    if (AB > 0 || H > 0) {
-      records.push({ date, opponent, player, AB, H });
-      stats.push({ player, AB, H });
+    const records = [];
+    let hasError = false;
+
+    players.forEach((player, index) => {
+      const AB = Number(document.getElementById(`ab${index}`).value || 0);
+      const H = Number(document.getElementById(`h${index}`).value || 0);
+
+      if (H > AB) {
+        alert(`${player} 的安打數不能大於打數`);
+        hasError = true;
+        return;
+      }
+
+      if (AB > 0 || H > 0) {
+        records.push({ date, opponent, player, AB, H });
+      }
+    });
+
+    if (hasError) return;
+
+    if (records.length === 0) {
+      alert("請至少輸入一位球員的本場數據");
+      return;
     }
-  });
 
-  if (hasError) return;
+    try {
+      await fetch(API_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({ records })
+      });
 
-  if (records.length === 0) {
-    alert("請至少輸入一位球員的本場數據");
-    return;
+      alert("已送出到 Google Sheet！");
+      await loadCloudData();
+      renderGameStatsTable();
+
+    } catch (error) {
+      alert("儲存失敗，請稍後再試");
+      console.error(error);
+    }
   }
 
-  // 先更新畫面
-  gameRecords.push({
-    id: Date.now(),
-    date,
-    opponent,
-    stats
-  });
+  async function deleteGameRecord(date, opponent) {
+    if (!confirm(`確定要刪除 ${date} vs ${opponent || "未填對手"} 這場紀錄嗎？`)) return;
 
-  renderSummaryTable();
-  renderHistoryList();
+    try {
+      await fetch(API_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({
+          action: "delete",
+          date,
+          opponent
+        })
+      });
 
-  try {
-    await fetch(API_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-    "Content-Type": "text/plain"
-  },
-  body: JSON.stringify({ records })
-});
+      alert("已送出刪除請求！");
+      await loadCloudData();
 
-    alert("已儲存到 Google Sheet！");
-    renderGameStatsTable();
-  } catch (error) {
-    alert("儲存失敗，請稍後再試");
-    console.error(error);
+    } catch (error) {
+      alert("刪除失敗，請稍後再試");
+      console.error(error);
+    }
   }
-}
+
   function getPlayerSummary() {
     const summary = {};
 
@@ -277,6 +290,10 @@
               </thead>
               <tbody>${rows}</tbody>
             </table>
+
+            <button class="deleteBtn" onclick="deleteGameRecord('${record.date}', '${record.opponent || ""}')">
+              🗑️ 刪除此紀錄
+            </button>
           </div>
         `;
       });
@@ -288,56 +305,48 @@
     renderHistoryList();
   }
 
-async function loadCloudData() {
-  try {
-    const response = await fetch(API_URL);
+  async function loadCloudData() {
+    try {
+      const response = await fetch(API_URL + "?time=" + Date.now());
+      const rows = await response.json();
 
-    if (!response.ok) {
-      throw new Error("HTTP " + response.status);
-    }
+      gameRecords = [];
+      const grouped = {};
 
-    const rows = await response.json();
+      rows.forEach(row => {
+        if (!row.date || !row.player) return;
 
-    gameRecords = [];
+        const date = String(row.date).slice(0, 10);
+        const opponent = row.opponent || "";
+        const key = `${date}_${opponent}`;
 
-    const grouped = {};
+        if (!grouped[key]) {
+          grouped[key] = {
+            id: key,
+            date,
+            opponent,
+            stats: []
+          };
+        }
 
-    rows.forEach(row => {
-      if (!row.date || !row.player) return;
-
-      const key = `${row.date}_${row.opponent}`;
-
-      if (!grouped[key]) {
-        grouped[key] = {
-          id: key,
-          date: row.date,
-          opponent: row.opponent,
-          stats: []
-        };
-      }
-
-      grouped[key].stats.push({
-        player: row.player,
-        AB: Number(row.AB || 0),
-        H: Number(row.H || 0)
+        grouped[key].stats.push({
+          player: row.player,
+          AB: Number(row.AB || 0),
+          H: Number(row.H || 0)
+        });
       });
-    });
 
-    gameRecords = Object.values(grouped);
+      gameRecords = Object.values(grouped);
+      renderSummaryTable();
+      renderHistoryList();
 
-    renderSummaryTable();
-    renderHistoryList();
-
-  } catch (error) {
-    console.error("讀取 Google Sheet 失敗：", error);
+    } catch (error) {
+      console.error("讀取 Google Sheet 失敗", error);
+    }
   }
-}
 
-// 先畫出畫面
-renderAll();
-
-// 再讀取雲端資料
-loadCloudData();
+  renderAll();
+  loadCloudData();
 </script>
 
 </body>
